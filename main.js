@@ -1,9 +1,3 @@
-/*
-@title: Space Invaders
-@author: 
-@tags: []
-@addedOn: 2024-00-00
-*/
 
 const player = "p"
 const Mob1 = "1"
@@ -17,7 +11,7 @@ let MovingAlienBulletLoop;
 
 
 setLegend(
-  [ player, bitmap`
+  [player, bitmap`
 .......44.......
 .......44.......
 .......44.......
@@ -142,9 +136,19 @@ setBackground(Background)
 
 // setSolids([player,Mob1])
 
-let Stage = 1
+let Stage = 0
 const Stages = [
-  map``,
+  map`
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......`,
   map`
 ......
 ..b...
@@ -164,12 +168,17 @@ setPushables({
   [ player ]: []
 })
 
+function PlayerShoot() {
+  addSprite(getFirst(player).x,getFirst(player).y,PlayerBullet)
+}
+
+
 // onInput("s", () => {
 //   getFirst(player).y += 1
 // })
-// onInput("w", () => {
-//   getFirst(player).y -= 1
-// })
+onInput("w", () => {
+  PlayerShoot()
+})
 onInput("a", () => {
   getFirst(player).x -= 1
 })
@@ -205,6 +214,14 @@ function AlienBulletsMove(speed) {
     }
 }}
 
+function PlayerBulletsMove(speed) {
+  for (let i = 0; i < getAll(PlayerBullet).length; i++) {
+    getAll(PlayerBullet)[i].y -= speed
+    if (getAll(PlayerBullet)[i].y == 1){
+      getAll(PlayerBullet)[i].remove()
+    }
+}}
+
 function Main_Loop(time) {
   clearInterval(MovingAliensLoop);
   MovingAliensLoop = setInterval(() => {
@@ -215,6 +232,7 @@ function Main_Loop(time) {
   }, time);
   setInterval(() => {
     AlienBulletsMove(1);
+    PlayerBulletsMove(2);
   }, 100);
 };
 
