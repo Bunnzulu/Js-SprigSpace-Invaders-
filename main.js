@@ -10,6 +10,10 @@ const Mob1 = "1"
 const Mob2 = "2"
 const Boss = "b"
 const Background = "B"
+const PlayerBullet = "P"
+const AlienBullet = "A"
+let MovingAliensLoop;
+let MovingAlienBulletLoop;
 
 
 setLegend(
@@ -81,6 +85,40 @@ setLegend(
 ................
 ................
 ................`],
+  [PlayerBullet, bitmap`
+................
+................
+................
+................
+................
+.......4........
+.......4........
+.......4........
+.......4........
+.......4........
+.......4........
+................
+................
+................
+................
+................`],
+  [AlienBullet,bitmap`
+................
+................
+................
+................
+................
+.......3........
+.......3........
+.......3........
+.......3........
+.......3........
+.......3........
+.......3........
+................
+................
+................
+................`],
   [Background, bitmap`
 0000000000000000
 0000000000000000
@@ -102,7 +140,7 @@ setLegend(
 
 setBackground(Background)
 
-setSolids([player,Mob1])
+// setSolids([player,Mob1])
 
 let Stage = 1
 const Stages = [
@@ -115,7 +153,9 @@ const Stages = [
 111111
 ......
 ......
-...p..`
+......
+......
+..p...`
 ]
 
 setMap(Stages[Stage])
@@ -124,18 +164,64 @@ setPushables({
   [ player ]: []
 })
 
-onInput("s", () => {
-  getFirst(player).y += 1
-})
-onInput("w", () => {
-  getFirst(player).y -= 1
-})
+// onInput("s", () => {
+//   getFirst(player).y += 1
+// })
+// onInput("w", () => {
+//   getFirst(player).y -= 1
+// })
 onInput("a", () => {
   getFirst(player).x -= 1
 })
 onInput("d", () => {
   getFirst(player).x += 1
 })
+
+function Move_Mob1() {
+  for (let i = 0; i < getAll(Mob1).length; i++) {
+    alien = getAll(Mob1)[i]
+    alien.y += 1
+  }
+}
+function Move_Mob2() {
+  for (let i = 0; i < getAll(Mob2).length; i++) {
+    alien = getAll(Mob2)[i]
+    alien.y += 1
+  }
+}
+
+function Mob1Shoot(AlienIndex) {
+  addSprite(getAll(Mob1)[AlienIndex].x,getAll(Mob1)[AlienIndex].y,AlienBullet)
+}
+function Mob2Shoot(AlienIndex) {
+  addSprite(getAll(Mob2)[AlienIndex].x,getAll(Mob2)[AlienIndex].y,AlienBullet)
+}
+
+function AlienBulletsMove(speed) {
+  for (let i = 0; i < getAll(AlienBullet).length; i++) {
+    getAll(AlienBullet)[i].y += speed
+    if (getAll(AlienBullet)[i].y >= 9){
+      getAll(AlienBullet)[i].remove()
+    }
+}}
+
+function Main_Loop(time) {
+  clearInterval(MovingAliensLoop);
+  MovingAliensLoop = setInterval(() => {
+    Move_Mob1();
+    Move_Mob2();
+    Mob1Shoot(1);
+    Mob2Shoot(1);
+  }, time);
+  setInterval(() => {
+    AlienBulletsMove(1);
+  }, 100);
+};
+
+
+
+
+Main_Loop(5000)
 
 afterInput(() => {
   
