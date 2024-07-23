@@ -1,3 +1,9 @@
+/*
+@title: Space Invaders
+@author: 
+@tags: []
+@addedOn: 2024-00-00
+*/
 
 const player = "p"
 const Mob1 = "1"
@@ -7,7 +13,6 @@ const Background = "B"
 const PlayerBullet = "P"
 const AlienBullet = "A"
 let MovingAliensLoop;
-let MovingAlienBulletLoop;
 
 
 setLegend(
@@ -163,7 +168,8 @@ const Stages = [
 ]
 
 setMap(Stages[Stage])
-
+addText("Space Invaders", options = { x:3, y:5, color: color`2` })
+addText("Press i to Play", options = { x:3, y:7, color: color`2` })
 setPushables({
   [ player ]: []
 })
@@ -171,21 +177,6 @@ setPushables({
 function PlayerShoot() {
   addSprite(getFirst(player).x,getFirst(player).y,PlayerBullet)
 }
-
-
-// onInput("s", () => {
-//   getFirst(player).y += 1
-// })
-onInput("w", () => {
-  PlayerShoot()
-})
-onInput("a", () => {
-  getFirst(player).x -= 1
-})
-onInput("d", () => {
-  getFirst(player).x += 1
-})
-
 function Move_Mob1() {
   for (let i = 0; i < getAll(Mob1).length; i++) {
     alien = getAll(Mob1)[i]
@@ -227,19 +218,39 @@ function Main_Loop(time) {
   MovingAliensLoop = setInterval(() => {
     Move_Mob1();
     Move_Mob2();
-    Mob1Shoot(1);
-    Mob2Shoot(1);
   }, time);
+  setInterval(() => {
+    Mob1Shoot(Math.floor(Math.random() * getAll(Mob1).length));
+    Mob2Shoot(Math.floor(Math.random() * getAll(Mob2).length));
+  }, 1000);
   setInterval(() => {
     AlienBulletsMove(1);
     PlayerBulletsMove(2);
-  }, 100);
+  },100)
 };
 
+function StageChange(Index){
+  Stage = Index
+  setMap(Stages[Stage])
+}
+
+onInput("i", () => {
+  StageChange(1)
+  clearText()
+  onInput("w", () => {
+    PlayerShoot()
+})
+  onInput("a", () => {
+  getFirst(player).x -= 1
+})
+  onInput("d", () => {
+  getFirst(player).x += 1
+})
+  Main_Loop(10000)
+})
 
 
 
-Main_Loop(5000)
 
 afterInput(() => {
   
