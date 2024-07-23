@@ -17,6 +17,8 @@ let Score = 0;
 let Lives = 6;
 // let graceperiod = 5;
 let MovingAliensLoop;
+let MovingAliensShootingLoop;
+let BulletsLoop;
 
 
 setLegend(
@@ -36,7 +38,7 @@ setLegend(
 ................
 ................
 ................
-................` ],
+................`],
   [Mob1, bitmap`
 ................
 ................
@@ -71,7 +73,7 @@ setLegend(
 ........2.......
 ........2.......
 ................`],
-  [Boss,bitmap`
+  [Boss, bitmap`
 ................
 .....333333.....
 ....33333333....
@@ -105,7 +107,7 @@ setLegend(
 ................
 ................
 ................`],
-  [AlienBullet,bitmap`
+  [AlienBullet, bitmap`
 ................
 ................
 ................
@@ -171,72 +173,97 @@ const Stages = [
 ......`
 ]
 setMap(Stages[Stage])
-addText("Space Invaders", options = { x:3, y:5, color: color`2` })
-addText("Press i to Play", options = { x:3, y:7, color: color`2` })
+addText("Space Invaders", options = { x: 3, y: 5, color: color`2` })
+addText("Press i to Play", options = { x: 3, y: 7, color: color`2` })
 setPushables({
-  [ player ]: []
+  [player]: []
 })
+
 function PlayerShoot() {
-  addSprite(getFirst(player).x,getFirst(player).y,PlayerBullet)
+  addSprite(getFirst(player).x, getFirst(player).y, PlayerBullet)
 }
+
 function Move_Mob1() {
   for (let i = 0; i < getAll(Mob1).length; i++) {
     alien = getAll(Mob1)[i]
     alien.y += 1
   }
 }
+
 function Move_Mob2() {
   for (let i = 0; i < getAll(Mob2).length; i++) {
     alien = getAll(Mob2)[i]
     alien.y += 1
   }
 }
+
 function Move_Boss() {
   getFirst(Boss).x += bossmovement
-  if (getFirst(Boss).x === 0|| getFirst(Boss).x === 5){
+  if (getFirst(Boss).x === 0 || getFirst(Boss).x === 5) {
     bossmovement *= -1
   }
 }
 
+function clearSprites() {
+  for (let sprite of getAll()) {
+    sprite.remove();
+  }
+}
 
 function Mob1Shoot(AlienIndex) {
-  if (getAll(Mob1).length > 0){
-    addSprite(getAll(Mob1)[AlienIndex].x,getAll(Mob1)[AlienIndex].y,AlienBullet)
+  if (getAll(Mob1).length > 0) {
+    addSprite(getAll(Mob1)[AlienIndex].x, getAll(Mob1)[AlienIndex].y, AlienBullet)
   }
 }
+
 function Mob2Shoot(AlienIndex) {
-  if (getAll(Mob2).length > 0){
-    addSprite(getAll(Mob2)[AlienIndex].x,getAll(Mob2)[AlienIndex].y,AlienBullet)
+  if (getAll(Mob2).length > 0) {
+    addSprite(getAll(Mob2)[AlienIndex].x, getAll(Mob2)[AlienIndex].y, AlienBullet)
   }
 }
-function BossShoot(){
-  addSprite(getFirst(Boss).x,getFirst(Boss).y,AlienBullet)
+
+function BossShoot() {
+  addSprite(getFirst(Boss).x, getFirst(Boss).y, AlienBullet)
 }
 
 function AlienBulletsMove(speed) {
   for (let i = 0; i < getAll(AlienBullet).length; i++) {
     getAll(AlienBullet)[i].y += speed
-    if (getAll(AlienBullet)[i].y >= 9){
+    if (getAll(AlienBullet)[i].y >= 9) {
       getAll(AlienBullet)[i].remove()
     }
     AlienBulletCollision()
-}}
+  }
+}
 
 function PlayerBulletsMove(speed) {
   for (let i = 0; i < getAll(PlayerBullet).length; i++) {
     getAll(PlayerBullet)[i].y -= speed
-    if (getAll(PlayerBullet)[i].y == 1){
+    if (getAll(PlayerBullet)[i].y == 1) {
       getAll(PlayerBullet)[i].remove()
     }
     PlayerBulletCollision()
-}}
+  }
+}
 
-function UpdateText(scorechange,livechange){
+function End_Game(text) {
+  addText(text, options = { x: 3, y: 5, color: color`2` })
+  clearInterval(MovingAliensShootingLoop);
+  clearInterval(MovingAliensLoop);
+  clearInterval(BulletsLoop);
+}
+
+function UpdateText(scorechange, livechange) {
   Score += scorechange
   Lives += livechange
   clearText()
-  addText(`${Score}`, options = { x:0, y:1, color: color`2`})
-  addText(`${Lives}`, options = { x:19, y:1, color: color`2`})
+  if (Lives === 0) {
+    clearSprites();
+    End_Game("You Lose")
+  } else {
+    addText(`${Score}`, options = { x: 0, y: 1, color: color`2` })
+    addText(`${Lives}`, options = { x: 19, y: 1, color: color`2` })
+  }
 }
 
 function Main_Loop(time) {
@@ -245,60 +272,61 @@ function Main_Loop(time) {
     Move_Mob1();
     Move_Mob2();
   }, time);
-  setInterval(() => {
+  MovingAliensShootingLoop = setInterval(() => {
     Mob1Shoot(Math.floor(Math.random() * getAll(Mob1).length));
     Mob2Shoot(Math.floor(Math.random() * getAll(Mob2).length));
     BossShoot();
     Move_Boss();
   }, 1000);
-  setInterval(() => {
+  BulletsLoop = setInterval(() => {
     AlienBulletsMove(1);
     PlayerBulletsMove(1);
-  },100)
+  }, 100)
 };
 
-function StageChange(Index){
+function StageChange(Index) {
   Stage = Index
   setMap(Stages[Stage])
 }
 
-function PlayerBulletCollision(){
+function PlayerBulletCollision() {
   tile = []
-  if (tilesWith(PlayerBullet,Mob1).length > 0){
-    tile = tilesWith(PlayerBullet,Mob1)[0]
-    UpdateText(100,0)
-    clearTile(tile[0].x,tile[0].y) 
+  if (tilesWith(PlayerBullet, Mob1).length > 0) {
+    tile = tilesWith(PlayerBullet, Mob1)[0]
+    UpdateText(100, 0)
+    clearTile(tile[0].x, tile[0].y)
   }
-  if (tilesWith(PlayerBullet,Mob2).length > 0){
-    tile = tilesWith(PlayerBullet,Mob2)[0]
-    clearTile(tile[0].x,tile[0].y) 
-    UpdateText(150,0)
+  if (tilesWith(PlayerBullet, Mob2).length > 0) {
+    tile = tilesWith(PlayerBullet, Mob2)[0]
+    clearTile(tile[0].x, tile[0].y)
+    UpdateText(150, 0)
   }
 }
-function AlienBulletCollision(){
-  if (tilesWith(AlienBullet,player).length > 0){
-     UpdateText(0,-1)
-    tilesWith(AlienBullet,player)[0][1].remove()
+
+function AlienBulletCollision() {
+  if (tilesWith(AlienBullet, player).length > 0) {
+    UpdateText(0, -1)
+    tilesWith(AlienBullet, player)[0][1].remove()
   }
 }
 
 
 
 onInput("i", () => {
-  if (Stage === 0){
+  if (Stage === 0) {
     StageChange(1)
     clearText()
-    addText(`${Score}`, options = { x:0, y:1, color: color`2`})
-    addText(`${Lives}`, options = { x:19, y:1, color: color`2`})
+    addText(`${Score}`, options = { x: 0, y: 1, color: color`2` })
+    addText(`${Lives}`, options = { x: 19, y: 1, color: color`2` })
     onInput("w", () => {
       PlayerShoot()
-  })
+    })
     onInput("a", () => {
-    getFirst(player).x -= 1
-  })
+      getFirst(player).x -= 1
+    })
     onInput("d", () => {
-    getFirst(player).x += 1
-  })
+      getFirst(player).x += 1
+    })
     Main_Loop(5000)
   }
 })
@@ -307,5 +335,5 @@ onInput("i", () => {
 
 
 afterInput(() => {
-  
+
 })
