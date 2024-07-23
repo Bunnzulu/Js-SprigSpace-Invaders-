@@ -211,6 +211,7 @@ function PlayerBulletsMove(speed) {
     if (getAll(PlayerBullet)[i].y == 1){
       getAll(PlayerBullet)[i].remove()
     }
+    Collision()
 }}
 
 function Main_Loop(time) {
@@ -233,6 +234,15 @@ function StageChange(Index){
   Stage = Index
   setMap(Stages[Stage])
 }
+
+function Collision(){
+  if (tilesWith(PlayerBullet,Mob1).length > 0){
+    tilesWith(PlayerBullet,Mob1)[0][0].remove()
+    tilesWith(PlayerBullet,Mob1)[0][0].remove()
+  }
+}
+
+
 
 onInput("i", () => {
   StageChange(1)
