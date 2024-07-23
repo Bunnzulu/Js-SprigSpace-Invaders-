@@ -12,6 +12,7 @@ const Boss = "b"
 const Background = "B"
 const PlayerBullet = "P"
 const AlienBullet = "A"
+let bossmovement = 1;
 let MovingAliensLoop;
 
 
@@ -166,14 +167,12 @@ const Stages = [
 ......
 ..p...`
 ]
-
 setMap(Stages[Stage])
 addText("Space Invaders", options = { x:3, y:5, color: color`2` })
 addText("Press i to Play", options = { x:3, y:7, color: color`2` })
 setPushables({
   [ player ]: []
 })
-
 function PlayerShoot() {
   addSprite(getFirst(player).x,getFirst(player).y,PlayerBullet)
 }
@@ -190,7 +189,10 @@ function Move_Mob2() {
   }
 }
 function Move_Boss() {
-  getFirst(Boss)
+  getFirst(Boss).x += bossmovement
+  if (getFirst(Boss).x === 0|| getFirst(Boss).x === 5){
+    bossmovement *= -1
+  }
 }
 
 
@@ -231,6 +233,7 @@ function Main_Loop(time) {
   setInterval(() => {
     Mob1Shoot(Math.floor(Math.random() * getAll(Mob1).length));
     Mob2Shoot(Math.floor(Math.random() * getAll(Mob2).length));
+    Move_Boss();
   }, 1000);
   setInterval(() => {
     AlienBulletsMove(1);
@@ -258,18 +261,20 @@ function Collision(){
 
 
 onInput("i", () => {
-  StageChange(1)
-  clearText()
-  onInput("w", () => {
-    PlayerShoot()
-})
-  onInput("a", () => {
-  getFirst(player).x -= 1
-})
-  onInput("d", () => {
-  getFirst(player).x += 1
-})
-  Main_Loop(10000)
+  if (Stage === 0){
+    StageChange(1)
+    clearText()
+    onInput("w", () => {
+      PlayerShoot()
+  })
+    onInput("a", () => {
+    getFirst(player).x -= 1
+  })
+    onInput("d", () => {
+    getFirst(player).x += 1
+  })
+    Main_Loop(5000)
+  }
 })
 
 
