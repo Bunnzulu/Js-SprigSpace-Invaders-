@@ -189,12 +189,20 @@ function Move_Mob2() {
     alien.y += 1
   }
 }
+function Move_Boss() {
+  getFirst(Boss)
+}
+
 
 function Mob1Shoot(AlienIndex) {
-  addSprite(getAll(Mob1)[AlienIndex].x,getAll(Mob1)[AlienIndex].y,AlienBullet)
+  if (getAll(Mob1).length > 0){
+    addSprite(getAll(Mob1)[AlienIndex].x,getAll(Mob1)[AlienIndex].y,AlienBullet)
+  }
 }
 function Mob2Shoot(AlienIndex) {
-  addSprite(getAll(Mob2)[AlienIndex].x,getAll(Mob2)[AlienIndex].y,AlienBullet)
+  if (getAll(Mob2).length > 0){
+    addSprite(getAll(Mob2)[AlienIndex].x,getAll(Mob2)[AlienIndex].y,AlienBullet)
+  }
 }
 
 function AlienBulletsMove(speed) {
@@ -226,7 +234,7 @@ function Main_Loop(time) {
   }, 1000);
   setInterval(() => {
     AlienBulletsMove(1);
-    PlayerBulletsMove(2);
+    PlayerBulletsMove(1);
   },100)
 };
 
@@ -236,9 +244,14 @@ function StageChange(Index){
 }
 
 function Collision(){
+  tile = []
   if (tilesWith(PlayerBullet,Mob1).length > 0){
-    tilesWith(PlayerBullet,Mob1)[0][0].remove()
-    tilesWith(PlayerBullet,Mob1)[0][0].remove()
+    tile = tilesWith(PlayerBullet,Mob1)[0]
+    clearTile(tile[0].x,tile[0].y) 
+  }
+  if (tilesWith(PlayerBullet,Mob2).length > 0){
+    tile = tilesWith(PlayerBullet,Mob2)[0]
+    clearTile(tile[0].x,tile[0].y) 
   }
 }
 
