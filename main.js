@@ -13,6 +13,9 @@ const Background = "B"
 const PlayerBullet = "P"
 const AlienBullet = "A"
 let bossmovement = 1;
+let Score = 0;
+let Lives = 6;
+// let graceperiod = 5;
 let MovingAliensLoop;
 
 
@@ -164,8 +167,8 @@ const Stages = [
 ......
 ......
 ......
-......
-..p...`
+..p...
+......`
 ]
 setMap(Stages[Stage])
 addText("Space Invaders", options = { x:3, y:5, color: color`2` })
@@ -206,6 +209,9 @@ function Mob2Shoot(AlienIndex) {
     addSprite(getAll(Mob2)[AlienIndex].x,getAll(Mob2)[AlienIndex].y,AlienBullet)
   }
 }
+function BossShoot(){
+  addSprite(getFirst(Boss).x,getFirst(Boss).y,AlienBullet)
+}
 
 function AlienBulletsMove(speed) {
   for (let i = 0; i < getAll(AlienBullet).length; i++) {
@@ -213,6 +219,7 @@ function AlienBulletsMove(speed) {
     if (getAll(AlienBullet)[i].y >= 9){
       getAll(AlienBullet)[i].remove()
     }
+    AlienBulletCollision()
 }}
 
 function PlayerBulletsMove(speed) {
@@ -221,8 +228,16 @@ function PlayerBulletsMove(speed) {
     if (getAll(PlayerBullet)[i].y == 1){
       getAll(PlayerBullet)[i].remove()
     }
-    Collision()
+    PlayerBulletCollision()
 }}
+
+function UpdateText(scorechange,livechange){
+  Score += scorechange
+  Lives += livechange
+  clearText()
+  addText(`${Score}`, options = { x:0, y:1, color: color`2`})
+  addText(`${Lives}`, options = { x:19, y:1, color: color`2`})
+}
 
 function Main_Loop(time) {
   clearInterval(MovingAliensLoop);
@@ -233,6 +248,7 @@ function Main_Loop(time) {
   setInterval(() => {
     Mob1Shoot(Math.floor(Math.random() * getAll(Mob1).length));
     Mob2Shoot(Math.floor(Math.random() * getAll(Mob2).length));
+    BossShoot();
     Move_Boss();
   }, 1000);
   setInterval(() => {
@@ -246,15 +262,23 @@ function StageChange(Index){
   setMap(Stages[Stage])
 }
 
-function Collision(){
+function PlayerBulletCollision(){
   tile = []
   if (tilesWith(PlayerBullet,Mob1).length > 0){
     tile = tilesWith(PlayerBullet,Mob1)[0]
+    UpdateText(100,0)
     clearTile(tile[0].x,tile[0].y) 
   }
   if (tilesWith(PlayerBullet,Mob2).length > 0){
     tile = tilesWith(PlayerBullet,Mob2)[0]
     clearTile(tile[0].x,tile[0].y) 
+    UpdateText(150,0)
+  }
+}
+function AlienBulletCollision(){
+  if (tilesWith(AlienBullet,player).length > 0){
+     UpdateText(0,-1)
+    tilesWith(AlienBullet,player)[0][1].remove()
   }
 }
 
@@ -264,6 +288,8 @@ onInput("i", () => {
   if (Stage === 0){
     StageChange(1)
     clearText()
+    addText(`${Score}`, options = { x:0, y:1, color: color`2`})
+    addText(`${Lives}`, options = { x:19, y:1, color: color`2`})
     onInput("w", () => {
       PlayerShoot()
   })
