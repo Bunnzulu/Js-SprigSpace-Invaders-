@@ -15,11 +15,11 @@ const PlayerBullet = "P"
 const AlienBullet = "A"
 let bossmovement = 1;
 let Score = 0;
-let Lives = 10;
+let Lives = 25;
 let MovingAliensLoop;
 let MovingAliensShootingLoop;
 let BulletsLoop;
-var Wave = 9
+var Wave = 1
 
 
 setLegend(
@@ -220,7 +220,9 @@ function Move_Mob1() {
   for (let i = 0; i < getAll(Mob1).length; i++) {
     alien = getAll(Mob1)[i]
     alien.y += 1
-    if (alien.y === 8){
+    if (alien.y === 8 && Wave <= 10){
+      End_Game("You Lose")
+    } else if (alien.y === 10 && Wave > 10){
       End_Game("You Lose")
     }
   }
@@ -230,7 +232,9 @@ function Move_Mob2() {
   for (let i = 0; i < getAll(Mob2).length; i++) {
     alien = getAll(Mob2)[i]
     alien.y += 1
-    if (alien.y === 8){
+    if (alien.y === 8 && Wave <= 10){
+      End_Game("You Lose")
+    } else if (alien.y === 10 && Wave > 10){
       End_Game("You Lose")
     }
   }
@@ -240,7 +244,9 @@ function Move_Mob3() {
   for (let i = 0; i < getAll(Mob3).length; i++) {
     alien = getAll(Mob3)[i]
     alien.y += 1
-    if (alien.y === 8){
+    if (alien.y === 8 && Wave <= 10){
+      End_Game("You Lose")
+    } else if (alien.y === 10 && Wave > 10){
       End_Game("You Lose")
     }
   }
@@ -273,7 +279,7 @@ function Mob2Shoot(AlienIndex) {
   }
 }
 
-function Mob2Shoot(AlienIndex) {
+function Mob3Shoot(AlienIndex) {
   if (getAll(Mob3).length > 0) {
     addSprite(getAll(Mob3)[AlienIndex].x, getAll(Mob3)[AlienIndex].y, AlienBullet)
   }
@@ -335,16 +341,23 @@ function Main_Loop(time) {
   MovingAliensLoop = setInterval(() => {
     Move_Mob1();
     Move_Mob2();
+    if (Wave > 10){
+      Move_Mob3()
+    }
   }, time);
   MovingAliensShootingLoop = setInterval(() => {
     Mob1Shoot(Math.floor(Math.random() * getAll(Mob1).length));
     Mob2Shoot(Math.floor(Math.random() * getAll(Mob2).length));
+    if (Wave > 10){
+      Mob3Shoot(Math.floor(Math.random() * getAll(Mob3).length))
+    };
     BossShoot();
     Move_Boss();
   }, 3000);
   BulletsLoop = setInterval(() => {
     AlienBulletsMove(1);
     PlayerBulletsMove(1);
+    // Alien_Respawn();
   }, 100)
 };
 
@@ -364,6 +377,11 @@ function PlayerBulletCollision() {
     tile = tilesWith(PlayerBullet, Mob2)[0]
     clearTile(tile[0].x, tile[0].y)
     UpdateText(150, 0,0)
+  }
+  if (tilesWith(PlayerBullet, Mob3).length > 0) {
+    tile = tilesWith(PlayerBullet, Mob3)[0]
+    clearTile(tile[0].x, tile[0].y)
+    UpdateText(200, 0,0)
   }
   if (tilesWith(PlayerBullet, Boss).length > 0) {
     tile = tilesWith(PlayerBullet, Boss)[0]
