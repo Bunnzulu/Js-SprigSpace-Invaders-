@@ -19,7 +19,7 @@ let Lives = 10;
 let MovingAliensLoop;
 let MovingAliensShootingLoop;
 let BulletsLoop;
-let Wave = 1
+var Wave = 9
 
 
 setLegend(
@@ -188,11 +188,11 @@ const Stages = [
 ......
 ......
 ..p...
-......`
+......`,
   map`
 ......
 ..b...
-......
+333333
 222222
 222222
 111111
@@ -236,6 +236,16 @@ function Move_Mob2() {
   }
 }
 
+function Move_Mob3() {
+  for (let i = 0; i < getAll(Mob3).length; i++) {
+    alien = getAll(Mob3)[i]
+    alien.y += 1
+    if (alien.y === 8){
+      End_Game("You Lose")
+    }
+  }
+}
+
 function Move_Boss() {
   if (getAll(Boss).length > 0){
     getFirst(Boss).x += bossmovement
@@ -260,6 +270,12 @@ function Mob1Shoot(AlienIndex) {
 function Mob2Shoot(AlienIndex) {
   if (getAll(Mob2).length > 0) {
     addSprite(getAll(Mob2)[AlienIndex].x, getAll(Mob2)[AlienIndex].y, AlienBullet)
+  }
+}
+
+function Mob2Shoot(AlienIndex) {
+  if (getAll(Mob3).length > 0) {
+    addSprite(getAll(Mob3)[AlienIndex].x, getAll(Mob3)[AlienIndex].y, AlienBullet)
   }
 }
 
@@ -366,7 +382,11 @@ function AlienBulletCollision() {
 function Alien_Respawn(){
   if (getAll().length == 1){
     StageChange(0)
-    StageChange(1)
+    if (Wave < 10){
+      StageChange(1)
+    } else {
+      StageChange(2)
+    }
     UpdateText(0,0,1)
   }
 }
