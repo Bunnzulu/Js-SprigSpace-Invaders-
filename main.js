@@ -13,7 +13,9 @@ const Boss = "b"
 const Background = "B"
 const PlayerBullet = "P"
 const AlienBullet = "A"
+const Shield = "S"
 let bossmovement = 1;
+let Shieldmovement = 1;
 let Score = 0;
 let Lives = 25;
 let MovingAliensLoop;
@@ -108,6 +110,23 @@ setLegend(
 ................
 ................
 ................`],
+  [Shield, bitmap`
+................
+................
+................
+................
+................
+................
+................
+4444444444444444
+4444444444444444
+................
+................
+................
+................
+................
+................
+................`],
   [PlayerBullet, bitmap`
 ................
 ................
@@ -186,7 +205,7 @@ const Stages = [
 111111
 ......
 ......
-......
+..S...
 ..p...
 ......`,
   map`
@@ -198,7 +217,7 @@ const Stages = [
 111111
 111111
 ......
-......
+...S..
 ......
 ..p...
 ......`
@@ -211,7 +230,7 @@ setPushables({
 })
 
 function PlayerShoot() {
-  if (getAll(player).length == 1){
+  if (getAll(player).length === 1 && (getAll(Mob1).length + getAll(Mob2).length + getAll(Mob3).length + getAll(Boss).length) > 0){
   addSprite(getFirst(player).x, getFirst(player).y, PlayerBullet)
   }
 }
@@ -261,6 +280,16 @@ function Move_Boss() {
   }
 }
 
+function Move_Shield(){
+  if (getAll(Shield).length > 0){
+    getFirst(Shield).x += Shieldmovement
+    ShieldCollisions()
+    if (getFirst(Shield).x === 0 || getFirst(Shield).x === 5) {
+      Shieldmovement *= -1
+    }
+  }
+}
+
 function clearSprites() {
   for (let sprite of getAll()) {
     sprite.remove();
@@ -304,10 +333,29 @@ function AlienBulletsMove(speed) {
 function PlayerBulletsMove(speed) {
   for (let i = 0; i < getAll(PlayerBullet).length; i++) {
     getAll(PlayerBullet)[i].y -= speed
-    if (getAll(PlayerBullet)[i].y == 0) {
+    if (getAll(PlayerBullet)[i].y === 0) {
       getAll(PlayerBullet)[i].remove()
     }
     PlayerBulletCollision()
+  }
+}
+
+function ShieldCollisions(){
+  if (tilesWith(Mob1, Shield).length > 0 && getAll(player).length > 0) {
+    tile = tilesWith(Mob1, Shield)[0]
+    clearTile(tile[0].x, tile[0].y)
+  }
+  if (tilesWith(Mob2, Shield).length > 0 && getAll(player).length > 0) {
+    tile = tilesWith(Mob2, Shield)[0]
+    clearTile(tile[0].x, tile[0].y)
+  }
+  if (tilesWith(Mob3, Shield).length > 0 && getAll(player).length > 0) {
+    tile = tilesWith(Mob3, Shield)[0]
+    clearTile(tile[0].x, tile[0].y)
+  }
+  if (tilesWith(Boss, Shield).length > 0 && getAll(player).length > 0) {
+    tile = tilesWith(Boss, Shield)[0]
+    clearTile(tile[0].x, tile[0].y)
   }
 }
 
@@ -357,8 +405,11 @@ function Main_Loop(time) {
   BulletsLoop = setInterval(() => {
     AlienBulletsMove(1);
     PlayerBulletsMove(1);
-    // Alien_Respawn();
+    Alien_Respawn();
   }, 100)
+  setInterval(() => {
+    Move_Shield();
+  },500)
 };
 
 function StageChange(Index) {
@@ -388,17 +439,27 @@ function PlayerBulletCollision() {
     clearTile(tile[0].x, tile[0].y)
     UpdateText(300, 0,0)
   }
+  if (tilesWith(PlayerBullet, AlienBullet).length > 0) {
+    tile = tilesWith(PlayerBullet, AlienBullet)[0]
+    clearTile(tile[0].x, tile[0].y)
+  }
+  if (tilesWith(PlayerBullet, Shield).length > 0 && getAll(player).length > 0) {
+    tilesWith(PlayerBullet, Shield)[0][1].remove()
+  }
 }
 
 function AlienBulletCollision() {
   if (tilesWith(AlienBullet, player).length > 0 && getAll(player).length > 0) {
     UpdateText(0, -1,0)
     tilesWith(AlienBullet, player)[0][1].remove()
+  };
+  if (tilesWith(AlienBullet, Shield).length > 0 && getAll(player).length > 0) {
+    tilesWith(AlienBullet, Shield)[0][1].remove()
   }
 }
 
 function Alien_Respawn(){
-  if (getAll().length == 1){
+  if ((getAll().length === 2 && getAll(player).length + getAll(Shield).length === 2) || (getAll().length === 1 && getAll(player).length === 1)){
     StageChange(0)
     if (Wave < 10){
       StageChange(1)
@@ -434,5 +495,4 @@ onInput("i", () => {
 
 
 afterInput(() => {
-  Alien_Respawn()
 })
