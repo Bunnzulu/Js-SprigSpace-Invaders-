@@ -18,6 +18,7 @@ let bossmovement = 1;
 let Shieldmovement = 1;
 let Score = 0;
 let Lives = 25;
+let Shield_durability = 25
 let MovingAliensLoop;
 let MovingAliensShootingLoop;
 let BulletsLoop;
@@ -182,7 +183,6 @@ setLegend(
 
 setBackground(Background)
 
-// setSolids([player,Mob1])
 
 let Stage = 0
 const Stages = [
@@ -217,8 +217,8 @@ const Stages = [
 111111
 111111
 ......
-...S..
 ......
+...S..
 ..p...
 ......`
 ]
@@ -406,6 +406,7 @@ function Main_Loop(time) {
     AlienBulletsMove(1);
     PlayerBulletsMove(1);
     Alien_Respawn();
+    Destroy_Shield();
   }, 100)
   setInterval(() => {
     Move_Shield();
@@ -415,6 +416,16 @@ function Main_Loop(time) {
 function StageChange(Index) {
   Stage = Index
   setMap(Stages[Stage])
+  if (Wave === 11){
+    Shield_durability = 25
+  }
+}
+
+function Create_Shield(){
+  if (Wave%10 === 0 && Wave > 10 && getAll(Shield).length === 0){
+    Shield_durability = 25
+    addSprite(3, 9, Shield)
+  }
 }
 
 function PlayerBulletCollision() {
@@ -445,6 +456,7 @@ function PlayerBulletCollision() {
   }
   if (tilesWith(PlayerBullet, Shield).length > 0 && getAll(player).length > 0) {
     tilesWith(PlayerBullet, Shield)[0][1].remove()
+    Shield_durability -= 1
   }
 }
 
@@ -455,7 +467,14 @@ function AlienBulletCollision() {
   };
   if (tilesWith(AlienBullet, Shield).length > 0 && getAll(player).length > 0) {
     tilesWith(AlienBullet, Shield)[0][1].remove()
+    Shield_durability -= 1
   }
+}
+
+function Destroy_Shield(){
+  if (Shield_durability <= 0 && getAll(Shield).length > 0){
+    getFirst(Shield).remove()
+  } 
 }
 
 function Alien_Respawn(){
@@ -465,6 +484,7 @@ function Alien_Respawn(){
       StageChange(1)
     } else {
       StageChange(2)
+      Create_Shield()
     }
     UpdateText(0,0,1)
   }
